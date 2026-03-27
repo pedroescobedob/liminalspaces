@@ -1,0 +1,41 @@
+# Unreal Engine
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.xcworkspace
+*.xcodeproj
+
+# Compiled files
+*.o
+*.obj
+*.pdb
+*.lib
+*.dll
+*.so
+*.dylib
+*.exe
+
+# Unreal specific
+*.VC.db
+*.opensdf
+*.opendb
+*.sdf
+*.suo
+*.sln.docstates
+*.cachefile
+*.BI.js
+*.TPS
+
+# Shader compilation
+*.shaderbin
