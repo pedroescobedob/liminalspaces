@@ -1,0 +1,109 @@
+/* Legal pages shared styles */
+.legal-page {
+    padding-top: 120px;
+    padding-bottom: 80px;
+    min-height: 100vh;
+}
+
+.legal-page h1 {
+    font-family: var(--font-mono);
+    font-size: 36px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.legal-updated {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 48px;
+    font-family: var(--font-mono);
+}
+
+.legal-page section {
+    margin-bottom: 40px;
+}
+
+.legal-page h2 {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    letter-spacing: 1px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+}
+
+.legal-page h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 20px 0 12px;
+    color: var(--text-primary);
+}
+
+.legal-page p {
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.8;
+    margin-bottom: 12px;
+}
+
+.legal-page ul {
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.8;
+    margin: 12px 0;
+    padding-left: 24px;
+}
+
+.legal-page li {
+    margin-bottom: 6px;
+}
+
+.legal-page a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.legal-page a:hover {
+    text-decoration: underline;
+}
+
+.legal-page strong {
+    color: var(--text-primary);
+}
+
+.cookie-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+}
+
+.cookie-table th,
+.cookie-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border: 1px solid var(--border);
+}
+
+.cookie-table th {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.cookie-table td {
+    color: var(--text-secondary);
+}
+
+.footer-copyright a {
+    color: var(--text-muted);
+    text-decoration: none;
+}
+
+.footer-copyright a:hover {
+    color: var(--accent);
+}

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liminal Spaces - Explore the In-Between</title>
+    <meta name="description" content="Liminal Spaces is a first-person exploration horror game. Navigate through unsettling environments, encounter alien creatures, and find your escape.">
+    <meta name="keywords" content="liminal spaces, horror game, exploration, sci-fi, unreal engine, indie game">
+    <meta property="og:title" content="Liminal Spaces - Explore the In-Between">
+    <meta property="og:description" content="A first-person exploration horror game set in liminal environments. Available on PC, Console, and Mobile.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="/logo-white.png">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <!-- Static noise overlay -->
+    <div class="noise-overlay"></div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">
+                <img src="/logo-white.png" alt="Liminal Spaces" height="32">
+            </a>
+            <div class="nav-links">
+                <a href="#about">About</a>
+                <a href="#features">Features</a>
+                <a href="#platforms">Platforms</a>
+                <a href="#leaderboard">Leaderboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-glitch" data-text="LIMINAL SPACES">LIMINAL SPACES</div>
+            <p class="hero-tagline">Explore the In-Between</p>
+            <p class="hero-description">You wake up in a bed cell. The fluorescent lights flicker. The hallways stretch endlessly. Something is watching. Find the escape.</p>
+            <div class="hero-buttons">
+                <a href="#platforms" class="btn btn-primary">Coming Soon</a>
+                <a href="#about" class="btn btn-outline">Learn More</a>
+            </div>
+        </div>
+        <div class="hero-scanline"></div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section section-dark">
+        <div class="container">
+            <h2 class="section-title flicker-text">About the Game</h2>
+            <div class="about-grid">
+                <div class="about-text">
+                    <p>Liminal Spaces is a first-person exploration horror game that drops you into the uncanny spaces between reality. Navigate through backrooms, abandoned metro stations, sci-fi corridors, and medical wards.</p>
+                    <p>Each map is a labyrinth. You spawn in a bed cell and must explore to find the hidden escape point. But you're not alone - alien creatures, zombie nurses, and other entities patrol these forgotten places.</p>
+                    <p>Built with Unreal Engine 5, featuring Nanite, Lumen global illumination, and atmospheric post-processing that makes every flickering hallway feel alive.</p>
+                </div>
+                <div class="about-stats">
+                    <div class="stat">
+                        <span class="stat-number">5+</span>
+                        <span class="stat-label">Unique Maps</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">5</span>
+                        <span class="stat-label">Enemy Types</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">UE5</span>
+                        <span class="stat-label">Engine</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">FPS</span>
+                        <span class="stat-label">First Person</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section">
+        <div class="container">
+            <h2 class="section-title">Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">&#9737;</div>
+                    <h3>Liminal Environments</h3>
+                    <p>Backrooms, abandoned metros, sci-fi hallways, medical wards, and underground facilities. Each map is a unique liminal experience.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#9876;</div>
+                    <h3>Combat System</h3>
+                    <p>Equip weapons to defend yourself. Hitscan and projectile weapons with ammo management. Defeat enemies to survive.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#9760;</div>
+                    <h3>Hostile Entities</h3>
+                    <p>Zombie nurses patrol medical wards. Alien creatures stalk sci-fi corridors. Each enemy has unique AI behavior and attack patterns.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#9951;</div>
+                    <h3>Atmospheric Horror</h3>
+                    <p>Flickering fluorescent lights, chromatic aberration, film grain, and ambient soundscapes create an unsettling atmosphere.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#9889;</div>
+                    <h3>Escape Objective</h3>
+                    <p>Spawn in a bed cell. Explore the map. Find the hidden escape point. Race against time and compete on the global leaderboard.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#9729;</div>
+                    <h3>Cross-Platform</h3>
+                    <p>Play on PC, PlayStation, Xbox, Nintendo Switch, iOS, and Android. Your progress syncs across devices.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Maps Section -->
+    <section class="section section-dark">
+        <div class="container">
+            <h2 class="section-title flicker-text">The Maps</h2>
+            <div class="maps-grid">
+                <div class="map-card">
+                    <div class="map-preview backrooms-bg"></div>
+                    <div class="map-info">
+                        <h3>The Backrooms</h3>
+                        <span class="map-difficulty difficulty-medium">Medium</span>
+                        <p>Endless yellow hallways. Wet carpet. Fluorescent hum. The original liminal nightmare.</p>
+                    </div>
+                </div>
+                <div class="map-card">
+                    <div class="map-preview scifi-bg"></div>
+                    <div class="map-info">
+                        <h3>Sci-Fi Hallway</h3>
+                        <span class="map-difficulty difficulty-hard">Hard</span>
+                        <p>Abandoned space station corridors. Blue-lit passages. Alien presence detected.</p>
+                    </div>
+                </div>
+                <div class="map-card">
+                    <div class="map-preview metro-bg"></div>
+                    <div class="map-info">
+                        <h3>Old Metro</h3>
+                        <span class="map-difficulty difficulty-easy">Easy</span>
+                        <p>Deserted subway tunnels. Echoing footsteps. The trains stopped running long ago.</p>
+                    </div>
+                </div>
+                <div class="map-card">
+                    <div class="map-preview cyberpunk-bg"></div>
+                    <div class="map-info">
+                        <h3>Cyberpunk District</h3>
+                        <span class="map-difficulty difficulty-hard">Hard</span>
+                        <p>Neon-soaked alleyways. Holographic signs flicker. Something moves in the shadows.</p>
+                    </div>
+                </div>
+                <div class="map-card">
+                    <div class="map-preview medical-bg"></div>
+                    <div class="map-info">
+                        <h3>Medical Ward</h3>
+                        <span class="map-difficulty difficulty-nightmare">Nightmare</span>
+                        <p>Abandoned hospital corridors. Zombie nurses patrol. Surgical instruments rust in silence.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Platforms Section -->
+    <section id="platforms" class="section">
+        <div class="container">
+            <h2 class="section-title">Available Platforms</h2>
+            <p class="section-subtitle">Coming soon to all major platforms</p>
+            <div class="platforms-grid">
+                <div class="platform-card">
+                    <div class="platform-icon">&#128187;</div>
+                    <h3>PC</h3>
+                    <p>Windows & Mac</p>
+                </div>
+                <div class="platform-card">
+                    <div class="platform-icon">&#127918;</div>
+                    <h3>PlayStation</h3>
+                    <p>PS5</p>
+                </div>
+                <div class="platform-card">
+                    <div class="platform-icon">&#127918;</div>
+                    <h3>Xbox</h3>
+                    <p>Series X|S</p>
+                </div>
+                <div class="platform-card">
+                    <div class="platform-icon">&#127918;</div>
+                    <h3>Switch</h3>
+                    <p>Nintendo Switch</p>
+                </div>
+                <div class="platform-card">
+                    <div class="platform-icon">&#128241;</div>
+                    <h3>iOS</h3>
+                    <p>iPhone & iPad</p>
+                </div>
+                <div class="platform-card">
+                    <div class="platform-icon">&#128241;</div>
+                    <h3>Android</h3>
+                    <p>Phones & Tablets</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Leaderboard Section -->
+    <section id="leaderboard" class="section section-dark">
+        <div class="container">
+            <h2 class="section-title flicker-text">Leaderboard</h2>
+            <p class="section-subtitle">Top escape times across all maps</p>
+            <div class="leaderboard-container">
+                <div class="leaderboard-empty">
+                    <p class="mono-text">NO DATA FOUND</p>
+                    <p>Leaderboard will populate when players start escaping.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <img src="/logo-white.png" alt="Liminal Spaces" height="28">
+                    <p>A first-person exploration horror game.</p>
+                    <p class="footer-copyright">&copy; 2026 Liminal Spaces. All rights reserved.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Game</h4>
+                    <a href="#about">About</a>
+                    <a href="#features">Features</a>
+                    <a href="#platforms">Platforms</a>
+                    <a href="#leaderboard">Leaderboard</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <a href="/privacy.html">Privacy Policy</a>
+                    <a href="/terms.html">Terms & Conditions</a>
+                    <a href="/cookies.html">Cookie Policy</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Connect</h4>
+                    <a href="https://github.com/pedroescobedob/liminalspaces" target="_blank" rel="noopener">GitHub</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/script.js"></script>
+</body>
+</html>

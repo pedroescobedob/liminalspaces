@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/Shared/Epic Games/UE_5.7/Engine/Build/BatchFiles/Mac/**)",
+      "Read(//Users/Shared/Epic Games/UE_5.7/**)",
+      "Bash(\"/Users/Shared/Epic Games/UE_5.7/Engine/Build/BatchFiles/Mac/Build.sh\" LiminalSpaces Mac Development \"/Users/pedroescobedo/Documents/liminalspaces/liminalspaces.uproject\")",
+      "Bash(\"/Users/Shared/Epic Games/UE_5.7/Engine/Build/BatchFiles/Mac/Build.sh\" liminalspacesEditor Mac Development \"/Users/pedroescobedo/Documents/liminalspaces/liminalspaces.uproject\")",
+      "Bash(while pgrep:*)",
+      "Bash(do sleep:*)"
+    ]
+  }
+}

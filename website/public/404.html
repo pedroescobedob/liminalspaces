@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Liminal Spaces</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .error-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .error-code {
+            font-family: var(--font-mono);
+            font-size: 120px;
+            color: var(--accent);
+            animation: flicker 3s infinite;
+        }
+        .error-message {
+            font-family: var(--font-mono);
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin: 16px 0 32px;
+            letter-spacing: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="noise-overlay"></div>
+    <div class="error-page">
+        <div>
+            <div class="error-code">404</div>
+            <p class="error-message">YOU HAVE ENTERED A VOID</p>
+            <a href="/" class="btn btn-outline">Return to Reality</a>
+        </div>
+    </div>
+</body>
+</html>
