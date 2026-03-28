@@ -10,9 +10,10 @@
     --text-primary: #e0e0e0;
     --text-secondary: #888888;
     --text-muted: #555555;
-    --accent: #00ff88;
-    --accent-dim: #00cc6a;
-    --accent-glow: rgba(0, 255, 136, 0.15);
+    --accent: #4da6ff;
+    --accent-dim: #2b8ae6;
+    --accent-glow: rgba(77, 166, 255, 0.15);
+    --accent-light: #80c4ff;
     --danger: #ff3344;
     --warning: #ffaa00;
     --border: #222222;
@@ -132,8 +133,8 @@ body {
         0deg,
         transparent,
         transparent 2px,
-        rgba(0, 255, 136, 0.01) 2px,
-        rgba(0, 255, 136, 0.01) 4px
+        rgba(77, 166, 255, 0.01) 2px,
+        rgba(77, 166, 255, 0.01) 4px
     );
     pointer-events: none;
 }
@@ -430,7 +431,7 @@ body {
     margin-bottom: 12px;
 }
 
-.difficulty-easy { background: rgba(0, 255, 136, 0.1); color: var(--accent); border: 1px solid var(--accent); }
+.difficulty-easy { background: rgba(77, 166, 255, 0.1); color: var(--accent-light); border: 1px solid var(--accent-light); }
 .difficulty-medium { background: rgba(255, 170, 0, 0.1); color: var(--warning); border: 1px solid var(--warning); }
 .difficulty-hard { background: rgba(255, 51, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
 .difficulty-nightmare { background: rgba(255, 51, 68, 0.2); color: #ff0022; border: 1px solid #ff0022; }
