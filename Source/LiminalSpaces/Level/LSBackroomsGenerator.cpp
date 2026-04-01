@@ -1,6 +1,7 @@
 #include "Level/LSBackroomsGenerator.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/PointLightComponent.h"
+#include "Components/SkyLightComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "GameFramework/PlayerStart.h"
@@ -19,15 +20,15 @@ ALSBackroomsGenerator::ALSBackroomsGenerator()
 	// Create instanced mesh components
 	FloorMeshes = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("FloorMeshes"));
 	FloorMeshes->SetupAttachment(RootComponent);
-	FloorMeshes->SetMobility(EComponentMobility::Static);
+	FloorMeshes->SetMobility(EComponentMobility::Movable);
 
 	CeilingMeshes = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("CeilingMeshes"));
 	CeilingMeshes->SetupAttachment(RootComponent);
-	CeilingMeshes->SetMobility(EComponentMobility::Static);
+	CeilingMeshes->SetMobility(EComponentMobility::Movable);
 
 	WallMeshes = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("WallMeshes"));
 	WallMeshes->SetupAttachment(RootComponent);
-	WallMeshes->SetMobility(EComponentMobility::Static);
+	WallMeshes->SetMobility(EComponentMobility::Movable);
 
 	// Load cube mesh
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube"));
@@ -267,6 +268,25 @@ void ALSBackroomsGenerator::SpawnLighting()
 	UWorld* World = GetWorld();
 	if (!World) return;
 
+	// Add a dim skylight for baseline ambient illumination
+	{
+		AActor* SkyActor = World->SpawnActor<AActor>(AActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+		if (SkyActor)
+		{
+			USceneComponent* SkyRoot = NewObject<USceneComponent>(SkyActor, TEXT("SkyRoot"));
+			SkyActor->SetRootComponent(SkyRoot);
+			SkyRoot->RegisterComponent();
+
+			USkyLightComponent* SkyLight = NewObject<USkyLightComponent>(SkyActor);
+			SkyLight->SetupAttachment(SkyRoot);
+			SkyLight->SetMobility(EComponentMobility::Movable);
+			SkyLight->SetIntensity(0.15f);
+			SkyLight->SetLightColor(FLinearColor(1.0f, 0.95f, 0.8f));
+			SkyLight->RegisterComponent();
+			SkyLight->RecaptureSky();
+		}
+	}
+
 	for (int32 X = 0; X < GridSizeX; X++)
 	{
 		for (int32 Y = 0; Y < GridSizeY; Y++)
@@ -274,8 +294,8 @@ void ALSBackroomsGenerator::SpawnLighting()
 			if (!Grid[X][Y])
 				continue;
 
-			// Place a light every 2-3 cells for that classic fluorescent grid look
-			bool bPlaceLight = (X % 3 == 1 && Y % 2 == 1) || (X % 2 == 0 && Y % 3 == 1);
+			// Place a light every 2 cells for good coverage
+			bool bPlaceLight = (X % 2 == 0 && Y % 2 == 0);
 			if (!bPlaceLight)
 				continue;
 
@@ -298,8 +318,8 @@ void ALSBackroomsGenerator::SpawnLighting()
 
 			// Classic fluorescent yellow-white light
 			Light->SetLightColor(FLinearColor(1.0f, 0.95f, 0.8f));
-			Light->SetIntensity(3000.0f);
-			Light->SetAttenuationRadius(600.0f);
+			Light->SetIntensity(8000.0f);
+			Light->SetAttenuationRadius(800.0f);
 			Light->SetCastShadows(false); // Better performance
 
 			// Add flickering to some lights for horror atmosphere

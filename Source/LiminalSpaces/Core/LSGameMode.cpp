@@ -34,17 +34,10 @@ void ALSGameMode::InitGame(const FString& MapName, const FString& Options, FStri
 
 	if (!bHasGenerator)
 	{
-		// Check if there's a PlayerStart already (meaning the level has manual content)
-		TArray<AActor*> PlayerStarts;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), PlayerStarts);
-
-		if (PlayerStarts.Num() == 0)
-		{
-			UE_LOG(LogLiminalSpaces, Log, TEXT("No level content found, generating backrooms..."));
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			GetWorld()->SpawnActor<ALSBackroomsGenerator>(ALSBackroomsGenerator::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
-		}
+		UE_LOG(LogLiminalSpaces, Log, TEXT("No level generator found, generating backrooms..."));
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		GetWorld()->SpawnActor<ALSBackroomsGenerator>(ALSBackroomsGenerator::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
 	}
 
 	UE_LOG(LogLiminalSpaces, Log, TEXT("InitGame: %s"), *MapName);

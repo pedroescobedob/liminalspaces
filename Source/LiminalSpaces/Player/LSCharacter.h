@@ -107,6 +107,7 @@ private:
 	void HandleAttack();
 	void HandleStopAttack();
 	void HandleInteract();
+	UFUNCTION()
 	void OnDeath();
 
 	bool bIsSprinting = false;
