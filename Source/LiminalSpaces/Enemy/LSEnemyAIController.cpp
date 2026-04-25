@@ -1,10 +1,12 @@
 #include "Enemy/LSEnemyAIController.h"
 #include "Enemy/LSEnemyBase.h"
+#include "Narrative/LSNarrativeSubsystem.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Hearing.h"
 #include "NavigationSystem.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "Engine/GameInstance.h"
 #include "LiminalSpaces.h"
 
 ALSEnemyAIController::ALSEnemyAIController()
@@ -87,6 +89,7 @@ void ALSEnemyAIController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimul
 
 void ALSEnemyAIController::SetTargetActor(AActor* InTarget)
 {
+	const bool bWasUntargeted = !TargetActor.IsValid();
 	TargetActor = InTarget;
 
 	if (ALSEnemyBase* Enemy = Cast<ALSEnemyBase>(GetPawn()))
@@ -96,10 +99,25 @@ void ALSEnemyAIController::SetTargetActor(AActor* InTarget)
 			Enemy->SetEnemyState(ELSEnemyState::Chasing);
 		}
 	}
+
+	if (bWasUntargeted)
+	{
+		if (UWorld* World = GetWorld())
+		{
+			if (UGameInstance* GI = World->GetGameInstance())
+			{
+				if (ULSNarrativeSubsystem* Narr = GI->GetSubsystem<ULSNarrativeSubsystem>())
+				{
+					Narr->NotifyEnemyAlerted();
+				}
+			}
+		}
+	}
 }
 
 void ALSEnemyAIController::ClearTarget()
 {
+	const bool bWasTargeted = TargetActor.IsValid();
 	TargetActor = nullptr;
 
 	if (ALSEnemyBase* Enemy = Cast<ALSEnemyBase>(GetPawn()))
@@ -107,6 +125,20 @@ void ALSEnemyAIController::ClearTarget()
 		if (Enemy->GetEnemyState() != ELSEnemyState::Dead)
 		{
 			Enemy->SetEnemyState(ELSEnemyState::Patrolling);
+		}
+	}
+
+	if (bWasTargeted)
+	{
+		if (UWorld* World = GetWorld())
+		{
+			if (UGameInstance* GI = World->GetGameInstance())
+			{
+				if (ULSNarrativeSubsystem* Narr = GI->GetSubsystem<ULSNarrativeSubsystem>())
+				{
+					Narr->NotifyEnemyLost();
+				}
+			}
 		}
 	}
 }

@@ -66,6 +66,8 @@ private:
 	void SpawnPlayerStart();
 	void SpawnEscapePoint();
 	void SpawnDoors();
+	void SpawnNarrativeContent();
+	TArray<FIntPoint> ComputePathToEscape() const;
 
 	bool IsPassage(int32 X, int32 Y) const;
 

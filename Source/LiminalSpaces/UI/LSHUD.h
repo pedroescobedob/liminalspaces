@@ -6,6 +6,8 @@
 
 class ULSHUDWidget;
 class ULSPauseMenuWidget;
+class ULSDialogWidget;
+class ULSWinScreenWidget;
 
 UCLASS()
 class LIMINALSPACES_API ALSHUD : public AHUD
@@ -17,6 +19,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "LiminalSpaces|HUD")
 	ULSHUDWidget* GetHUDWidget() const { return HUDWidget; }
+
+	UFUNCTION(BlueprintPure, Category = "LiminalSpaces|HUD")
+	ULSDialogWidget* GetDialogWidget() const { return DialogWidget; }
 
 	virtual void ShowHUD() override;
 
@@ -32,6 +37,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LiminalSpaces|HUD")
 	void ShowEscapeScreen(float CompletionTime);
 
+	UFUNCTION(BlueprintCallable, Category = "LiminalSpaces|HUD")
+	void ShowWinScreen(float CompletionTime, int32 CluesCollected);
+
+	UFUNCTION()
+	void HandleClueCollected(FName ClueID);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -41,10 +52,22 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LiminalSpaces|HUD")
 	TSubclassOf<ULSPauseMenuWidget> PauseMenuWidgetClass;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LiminalSpaces|HUD")
+	TSubclassOf<ULSDialogWidget> DialogWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LiminalSpaces|HUD")
+	TSubclassOf<ULSWinScreenWidget> WinScreenWidgetClass;
+
 private:
 	UPROPERTY()
 	TObjectPtr<ULSHUDWidget> HUDWidget;
 
 	UPROPERTY()
 	TObjectPtr<ULSPauseMenuWidget> PauseMenuWidget;
+
+	UPROPERTY()
+	TObjectPtr<ULSDialogWidget> DialogWidget;
+
+	UPROPERTY()
+	TObjectPtr<ULSWinScreenWidget> WinScreenWidget;
 };

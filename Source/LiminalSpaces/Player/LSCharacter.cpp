@@ -10,9 +10,11 @@
 #include "InputActionValue.h"
 #include "Combat/LSHealthComponent.h"
 #include "Combat/LSCombatComponent.h"
+#include "Combat/LSMeleeWeapon.h"
 #include "Level/LSInteractableBase.h"
 #include "Player/LSInteractionComponent.h"
 #include "Core/LSGameMode.h"
+#include "Narrative/LSNarrativeSubsystem.h"
 #include "LiminalSpaces.h"
 
 ALSCharacter::ALSCharacter()
@@ -49,13 +51,13 @@ ALSCharacter::ALSCharacter()
 	GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchSpeed;
 	GetCharacterMovement()->JumpZVelocity = 420.0f;
 	GetCharacterMovement()->AirControl = 0.2f;
+
+	// Default starter weapon
+	StarterUnarmedWeaponClass = ALSMeleeWeapon::StaticClass();
 }
 
-void ALSCharacter::BeginPlay()
+void ALSCharacter::CreateInputActions()
 {
-	Super::BeginPlay();
-
-	// Create input actions programmatically if not assigned via Blueprint
 	if (!MoveAction)
 	{
 		MoveAction = NewObject<UInputAction>(this, TEXT("IA_Move"));
@@ -92,19 +94,19 @@ void ALSCharacter::BeginPlay()
 		InteractAction->ValueType = EInputActionValueType::Boolean;
 	}
 
-	// Create mapping context with key bindings
 	if (!DefaultMappingContext)
 	{
 		DefaultMappingContext = NewObject<UInputMappingContext>(this, TEXT("IMC_Gameplay"));
 
-		// W - Forward (Axis2D: need to put value on Y axis)
+		// === KEYBOARD: WASD ===
+		// W - Forward
 		{
 			FEnhancedActionKeyMapping& Mapping = DefaultMappingContext->MapKey(MoveAction, EKeys::W);
 			UInputModifierSwizzleAxis* Swizzle = NewObject<UInputModifierSwizzleAxis>(DefaultMappingContext);
 			Swizzle->Order = EInputAxisSwizzle::YXZ;
 			Mapping.Modifiers.Add(Swizzle);
 		}
-		// S - Backward (negative Y)
+		// S - Backward
 		{
 			FEnhancedActionKeyMapping& Mapping = DefaultMappingContext->MapKey(MoveAction, EKeys::S);
 			UInputModifierSwizzleAxis* Swizzle = NewObject<UInputModifierSwizzleAxis>(DefaultMappingContext);
@@ -113,18 +115,59 @@ void ALSCharacter::BeginPlay()
 			Mapping.Modifiers.Add(Swizzle);
 			Mapping.Modifiers.Add(Negate);
 		}
-		// D - Right (positive X, default)
+		// D - Right
 		{
 			DefaultMappingContext->MapKey(MoveAction, EKeys::D);
 		}
-		// A - Left (negative X)
+		// A - Left
 		{
 			FEnhancedActionKeyMapping& Mapping = DefaultMappingContext->MapKey(MoveAction, EKeys::A);
 			UInputModifierNegate* Negate = NewObject<UInputModifierNegate>(DefaultMappingContext);
 			Mapping.Modifiers.Add(Negate);
 		}
 
-		// Mouse Look
+		// === KEYBOARD: ARROW KEYS ===
+		// Up Arrow - Forward
+		{
+			FEnhancedActionKeyMapping& Mapping = DefaultMappingContext->MapKey(MoveAction, EKeys::Up);
+			UInputModifierSwizzleAxis* Swizzle = NewObject<UInputModifierSwizzleAxis>(DefaultMappingContext);
+			Swizzle->Order = EInputAxisSwizzle::YXZ;
+			Mapping.Modifiers.Add(Swizzle);
+		}
+		// Down Arrow - Backward
+		{
+			FEnhancedActionKeyMapping& Mapping = DefaultMappingContext->MapKey(MoveAction, EKeys::Down);
+			UInputModifierSwizzleAxis* Swizzle = NewObject<UInputModifierSwizzleAxis>(DefaultMappingContext);
+			Swizzle->Order = EInputAxisSwizzle::YXZ;
+			UInputModifierNegate* Negate = NewObject<UInputModifierNegate>(DefaultMappingContext);
+			Mapping.Modifiers.Add(Swizzle);
+			Mapping.Modifiers.Add(Negate);
+		}
+		// Right Arrow
+		{
+			DefaultMappingContext->MapKey(MoveAction, EKeys::Right);
+		}
+		// Left Arrow
+		{
+			FEnhancedActionKeyMapping& Mapping = DefaultMappingContext->MapKey(MoveAction, EKeys::Left);
+			UInputModifierNegate* Negate = NewObject<UInputModifierNegate>(DefaultMappingContext);
+			Mapping.Modifiers.Add(Negate);
+		}
+
+		// === GAMEPAD: LEFT STICK - Movement ===
+		// Left stick X (right/left)
+		{
+			DefaultMappingContext->MapKey(MoveAction, EKeys::Gamepad_LeftX);
+		}
+		// Left stick Y (forward/back)
+		{
+			FEnhancedActionKeyMapping& Mapping = DefaultMappingContext->MapKey(MoveAction, EKeys::Gamepad_LeftY);
+			UInputModifierSwizzleAxis* Swizzle = NewObject<UInputModifierSwizzleAxis>(DefaultMappingContext);
+			Swizzle->Order = EInputAxisSwizzle::YXZ;
+			Mapping.Modifiers.Add(Swizzle);
+		}
+
+		// === MOUSE LOOK ===
 		{
 			FEnhancedActionKeyMapping& Mapping = DefaultMappingContext->MapKey(LookAction, EKeys::Mouse2D);
 			UInputModifierNegate* Negate = NewObject<UInputModifierNegate>(DefaultMappingContext);
@@ -134,21 +177,47 @@ void ALSCharacter::BeginPlay()
 			Mapping.Modifiers.Add(Negate);
 		}
 
-		// Jump - Space
+		// === GAMEPAD: RIGHT STICK - Look ===
+		// Right stick X (yaw)
+		{
+			DefaultMappingContext->MapKey(LookAction, EKeys::Gamepad_RightX);
+		}
+		// Right stick Y (pitch)
+		{
+			FEnhancedActionKeyMapping& Mapping = DefaultMappingContext->MapKey(LookAction, EKeys::Gamepad_RightY);
+			UInputModifierSwizzleAxis* Swizzle = NewObject<UInputModifierSwizzleAxis>(DefaultMappingContext);
+			Swizzle->Order = EInputAxisSwizzle::YXZ;
+			Mapping.Modifiers.Add(Swizzle);
+		}
+
+		// === JUMP ===
 		DefaultMappingContext->MapKey(JumpAction, EKeys::SpaceBar);
+		DefaultMappingContext->MapKey(JumpAction, EKeys::Gamepad_FaceButton_Bottom); // A / Cross
 
-		// Sprint - Left Shift
+		// === SPRINT ===
 		DefaultMappingContext->MapKey(SprintAction, EKeys::LeftShift);
+		DefaultMappingContext->MapKey(SprintAction, EKeys::Gamepad_LeftThumbstick); // L3 click
 
-		// Crouch - Left Ctrl
+		// === CROUCH ===
 		DefaultMappingContext->MapKey(CrouchAction, EKeys::LeftControl);
+		DefaultMappingContext->MapKey(CrouchAction, EKeys::Gamepad_RightThumbstick); // R3 click
 
-		// Attack - Left Mouse Button
+		// === ATTACK ===
 		DefaultMappingContext->MapKey(AttackAction, EKeys::LeftMouseButton);
+		DefaultMappingContext->MapKey(AttackAction, EKeys::Gamepad_RightTrigger); // RT / R2
 
-		// Interact - E
+		// === INTERACT ===
 		DefaultMappingContext->MapKey(InteractAction, EKeys::E);
+		DefaultMappingContext->MapKey(InteractAction, EKeys::Gamepad_FaceButton_Left); // X / Square
 	}
+}
+
+void ALSCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Ensure input actions exist
+	CreateInputActions();
 
 	// Add mapping context to input subsystem
 	if (APlayerController* PC = Cast<APlayerController>(Controller))
@@ -169,16 +238,82 @@ void ALSCharacter::BeginPlay()
 	}
 
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	CurrentStamina = MaxStamina;
+
+	// Auto-equip the starter weapon if no other has been set on the combat component
+	if (CombatComponent && !CombatComponent->HasWeapon() && StarterUnarmedWeaponClass)
+	{
+		CombatComponent->EquipWeapon(StarterUnarmedWeaponClass);
+	}
+
+	// Fire the intro line(s) so the protagonist's voice greets the player
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (ULSNarrativeSubsystem* Narr = GI->GetSubsystem<ULSNarrativeSubsystem>())
+		{
+			FTimerHandle Tmp1, Tmp2, Tmp3, Tmp4;
+			GetWorldTimerManager().SetTimer(Tmp1, [Narr]() { if (Narr) Narr->RequestLine(FName("intro_1")); }, 1.0f, false);
+			GetWorldTimerManager().SetTimer(Tmp2, [Narr]() { if (Narr) Narr->RequestLine(FName("intro_2")); }, 6.0f, false);
+			GetWorldTimerManager().SetTimer(Tmp3, [Narr]() { if (Narr) Narr->RequestLine(FName("intro_3")); }, 12.5f, false);
+			GetWorldTimerManager().SetTimer(Tmp4, [Narr]() { if (Narr) Narr->RequestLine(FName("intro_4")); }, 19.0f, false);
+		}
+	}
+
+	NextAmbientLineTime = GetWorld()->GetTimeSeconds() + 30.0f;
 }
 
 void ALSCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// Kill plane - respawn if fallen below the level
+	if (GetActorLocation().Z < -500.0f)
+	{
+		SetActorLocation(FVector(800.0f, 800.0f, 100.0f));
+		GetCharacterMovement()->StopMovementImmediately();
+	}
+
+	// Stamina: drain while sprinting + actually moving, regen otherwise
+	const bool bIsActuallyMoving = GetCharacterMovement()->Velocity.SizeSquared2D() > 100.0f;
+	const float Now = GetWorld()->GetTimeSeconds();
+
+	if (bIsSprinting && bIsActuallyMoving)
+	{
+		CurrentStamina = FMath::Max(0.0f, CurrentStamina - StaminaDrainPerSecond * DeltaTime);
+		TimeOfLastStaminaUse = Now;
+		if (CurrentStamina <= 0.0f)
+		{
+			HandleSprintStop();
+		}
+	}
+	else if (Now - TimeOfLastStaminaUse >= StaminaRegenDelay)
+	{
+		CurrentStamina = FMath::Min(MaxStamina, CurrentStamina + StaminaRegenPerSecond * DeltaTime);
+	}
+
+	// Periodically pick a calm/atmospheric line — but only when not in danger
+	if (Now >= NextAmbientLineTime)
+	{
+		NextAmbientLineTime = Now + FMath::FRandRange(22.0f, 38.0f);
+		if (UGameInstance* GI = GetGameInstance())
+		{
+			if (ULSNarrativeSubsystem* Narr = GI->GetSubsystem<ULSNarrativeSubsystem>())
+			{
+				if (!Narr->IsInDanger())
+				{
+					Narr->RequestRandomCalmLine();
+				}
+			}
+		}
+	}
 }
 
 void ALSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	// Create input actions before binding (SetupPlayerInputComponent runs before BeginPlay)
+	CreateInputActions();
 
 	if (UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
@@ -263,6 +398,11 @@ void ALSCharacter::HandleStopJump()
 
 void ALSCharacter::HandleSprintStart()
 {
+	if (CurrentStamina <= 5.0f)
+	{
+		// Refuse to start sprinting if exhausted; player has to wait for regen
+		return;
+	}
 	bIsSprinting = true;
 	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
 }

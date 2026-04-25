@@ -38,6 +38,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "LiminalSpaces|Player")
 	bool IsSprinting() const { return bIsSprinting; }
 
+	UFUNCTION(BlueprintPure, Category = "LiminalSpaces|Player")
+	float GetStaminaPercent() const { return MaxStamina > 0.0f ? (CurrentStamina / MaxStamina) : 0.0f; }
+
+	UFUNCTION(BlueprintPure, Category = "LiminalSpaces|Player")
+	float GetStamina() const { return CurrentStamina; }
+
+	UFUNCTION(BlueprintPure, Category = "LiminalSpaces|Player")
+	float GetMaxStamina() const { return MaxStamina; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -96,7 +105,24 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LiminalSpaces|Camera")
 	float LookSensitivity = 1.0f;
 
+	// === Stamina ===
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LiminalSpaces|Stamina")
+	float MaxStamina = 100.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LiminalSpaces|Stamina")
+	float StaminaDrainPerSecond = 22.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LiminalSpaces|Stamina")
+	float StaminaRegenPerSecond = 14.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LiminalSpaces|Stamina")
+	float StaminaRegenDelay = 1.2f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LiminalSpaces|Combat")
+	TSubclassOf<class ALSWeaponBase> StarterUnarmedWeaponClass;
+
 private:
+	void CreateInputActions();
 	void HandleMove(const struct FInputActionValue& Value);
 	void HandleLook(const struct FInputActionValue& Value);
 	void HandleJump();
@@ -111,4 +137,7 @@ private:
 	void OnDeath();
 
 	bool bIsSprinting = false;
+	float CurrentStamina = 100.0f;
+	float TimeOfLastStaminaUse = -100.0f;
+	float NextAmbientLineTime = 0.0f;
 };

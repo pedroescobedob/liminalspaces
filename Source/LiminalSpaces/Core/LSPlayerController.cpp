@@ -26,6 +26,7 @@ void ALSPlayerController::BeginPlay()
 	{
 		GameplayMappingContext = NewObject<UInputMappingContext>(this, TEXT("IMC_Controller"));
 		GameplayMappingContext->MapKey(PauseAction, EKeys::Escape);
+		GameplayMappingContext->MapKey(PauseAction, EKeys::Gamepad_Special_Right); // Start / Options button
 	}
 
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
