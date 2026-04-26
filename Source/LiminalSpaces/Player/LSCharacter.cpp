@@ -1,6 +1,8 @@
 #include "Player/LSCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Camera/CameraShakeBase.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/PostProcessComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -8,6 +10,8 @@
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
 #include "InputActionValue.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialInterface.h"
 #include "Combat/LSHealthComponent.h"
 #include "Combat/LSCombatComponent.h"
 #include "Combat/LSMeleeWeapon.h"
@@ -15,6 +19,7 @@
 #include "Player/LSInteractionComponent.h"
 #include "Core/LSGameMode.h"
 #include "Narrative/LSNarrativeSubsystem.h"
+#include "UObject/ConstructorHelpers.h"
 #include "LiminalSpaces.h"
 
 ALSCharacter::ALSCharacter()
@@ -54,6 +59,39 @@ ALSCharacter::ALSCharacter()
 
 	// Default starter weapon
 	StarterUnarmedWeaponClass = ALSMeleeWeapon::StaticClass();
+
+	// Bodycam VHS post-process — applied to the camera so the effect follows the player
+	CameraPostProcess = CreateDefaultSubobject<UPostProcessComponent>(TEXT("CameraPostProcess"));
+	CameraPostProcess->SetupAttachment(FirstPersonCamera);
+	CameraPostProcess->bUnbound = true;       // Always apply, regardless of volume bounds
+	CameraPostProcess->BlendWeight = 1.0f;
+	CameraPostProcess->Priority = 1.0f;
+
+	// Default-load the materials and shake classes by path. Safe if the asset is missing —
+	// the FObjectFinder simply returns null and the post-process becomes a no-op.
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> VHSFinder(
+		TEXT("/Game/Bodycam_VHS_Effect/Materials/Instances/PostProcess/MI_OldVHS.MI_OldVHS"));
+	if (VHSFinder.Succeeded()) { VHSBaseMaterial = VHSFinder.Object; }
+
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> NoiseFinder(
+		TEXT("/Game/Bodycam_VHS_Effect/Materials/Instances/PostProcess/MI_Noise.MI_Noise"));
+	if (NoiseFinder.Succeeded()) { NoiseBaseMaterial = NoiseFinder.Object; }
+
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> AberrFinder(
+		TEXT("/Game/Bodycam_VHS_Effect/Materials/Instances/PostProcess/MI_ChromaticAbberation.MI_ChromaticAbberation"));
+	if (AberrFinder.Succeeded()) { AberrationBaseMaterial = AberrFinder.Object; }
+
+	static ConstructorHelpers::FClassFinder<UCameraShakeBase> IdleShakeFinder(
+		TEXT("/Game/Bodycam_VHS_Effect/Blueprints/CameraShakes/BP_CameraShake_Idle"));
+	if (IdleShakeFinder.Succeeded()) { IdleCameraShakeClass = IdleShakeFinder.Class; }
+
+	static ConstructorHelpers::FClassFinder<UCameraShakeBase> WalkShakeFinder(
+		TEXT("/Game/Bodycam_VHS_Effect/Blueprints/CameraShakes/BP_CameraShake_Walk"));
+	if (WalkShakeFinder.Succeeded()) { WalkCameraShakeClass = WalkShakeFinder.Class; }
+
+	static ConstructorHelpers::FClassFinder<UCameraShakeBase> RunShakeFinder(
+		TEXT("/Game/Bodycam_VHS_Effect/Blueprints/CameraShakes/BP_CameraShake_Run"));
+	if (RunShakeFinder.Succeeded()) { RunCameraShakeClass = RunShakeFinder.Class; }
 }
 
 void ALSCharacter::CreateInputActions()
@@ -246,6 +284,9 @@ void ALSCharacter::BeginPlay()
 		CombatComponent->EquipWeapon(StarterUnarmedWeaponClass);
 	}
 
+	// Bodycam VHS post-process pipeline + idle camera shake
+	InitializePostProcess();
+
 	// Fire the intro line(s) so the protagonist's voice greets the player
 	if (UGameInstance* GI = GetGameInstance())
 	{
@@ -305,6 +346,135 @@ void ALSCharacter::Tick(float DeltaTime)
 				}
 			}
 		}
+	}
+
+	UpdateCameraShakeForMovement();
+	UpdatePostProcessIntensity(DeltaTime);
+}
+
+void ALSCharacter::InitializePostProcess()
+{
+	if (!CameraPostProcess)
+	{
+		return;
+	}
+
+	// Add the static VHS overlay at full weight — it's the base "this is a bodycam" look
+	if (VHSBaseMaterial)
+	{
+		FWeightedBlendable VHSBlend;
+		VHSBlend.Object = VHSBaseMaterial;
+		VHSBlend.Weight = 1.0f;
+		CameraPostProcess->Settings.WeightedBlendables.Array.Add(VHSBlend);
+	}
+
+	// Noise & chromatic aberration get dynamic instances so we can scale their
+	// intensity at runtime based on the narrative danger state.
+	if (NoiseBaseMaterial)
+	{
+		NoiseMID = UMaterialInstanceDynamic::Create(NoiseBaseMaterial, this);
+		if (NoiseMID)
+		{
+			FWeightedBlendable NoiseBlend;
+			NoiseBlend.Object = NoiseMID;
+			NoiseBlend.Weight = 0.6f;       // Calm baseline
+			CameraPostProcess->Settings.WeightedBlendables.Array.Add(NoiseBlend);
+		}
+	}
+
+	if (AberrationBaseMaterial)
+	{
+		AberrationMID = UMaterialInstanceDynamic::Create(AberrationBaseMaterial, this);
+		if (AberrationMID)
+		{
+			FWeightedBlendable AberrBlend;
+			AberrBlend.Object = AberrationMID;
+			AberrBlend.Weight = 0.4f;       // Calm baseline
+			CameraPostProcess->Settings.WeightedBlendables.Array.Add(AberrBlend);
+		}
+	}
+
+	// Start the idle shake immediately so handheld bob is always present
+	if (IdleCameraShakeClass)
+	{
+		if (APlayerController* PC = Cast<APlayerController>(Controller))
+		{
+			PC->ClientStartCameraShake(IdleCameraShakeClass, 1.0f);
+			CurrentShakeClass = IdleCameraShakeClass;
+		}
+	}
+}
+
+void ALSCharacter::UpdateCameraShakeForMovement()
+{
+	APlayerController* PC = Cast<APlayerController>(Controller);
+	if (!PC)
+	{
+		return;
+	}
+
+	const float Speed2D = GetCharacterMovement()->Velocity.Size2D();
+	TSubclassOf<UCameraShakeBase> Desired = IdleCameraShakeClass;
+	if (Speed2D > 50.0f)
+	{
+		Desired = (bIsSprinting && RunCameraShakeClass) ? RunCameraShakeClass : WalkCameraShakeClass;
+	}
+
+	if (Desired && Desired != CurrentShakeClass)
+	{
+		if (CurrentShakeClass)
+		{
+			PC->ClientStopCameraShake(CurrentShakeClass, true);
+		}
+		PC->ClientStartCameraShake(Desired, 1.0f);
+		CurrentShakeClass = Desired;
+	}
+}
+
+void ALSCharacter::UpdatePostProcessIntensity(float DeltaTime)
+{
+	if (!NoiseMID && !AberrationMID)
+	{
+		return;
+	}
+
+	// Fetch danger state from the narrative subsystem and lerp toward it so transitions
+	// don't snap. In danger: noise/aberration spike. Calm: relaxed baseline.
+	float TargetDanger = 0.0f;
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (ULSNarrativeSubsystem* Narr = GI->GetSubsystem<ULSNarrativeSubsystem>())
+		{
+			TargetDanger = Narr->IsInDanger() ? 1.0f : 0.0f;
+		}
+	}
+	CurrentDangerBlend = FMath::FInterpTo(CurrentDangerBlend, TargetDanger, DeltaTime, 2.5f);
+
+	// Also factor in low health → more visual stress
+	float HealthStress = 0.0f;
+	if (HealthComponent && HealthComponent->GetMaxHealth() > 0.0f)
+	{
+		const float HP = HealthComponent->GetHealthPercent();
+		HealthStress = FMath::Clamp(1.0f - (HP / 0.5f), 0.0f, 1.0f); // ramps when HP < 50%
+	}
+
+	const float CombinedStress = FMath::Clamp(CurrentDangerBlend + HealthStress * 0.7f, 0.0f, 1.0f);
+
+	// Try several common parameter names; the asset author's MIs may use any of them.
+	// Setting an unknown parameter is harmless — the engine ignores it.
+	if (NoiseMID)
+	{
+		const float NoiseIntensity = FMath::Lerp(0.35f, 1.15f, CombinedStress);
+		NoiseMID->SetScalarParameterValue(TEXT("Intensity"), NoiseIntensity);
+		NoiseMID->SetScalarParameterValue(TEXT("Strength"), NoiseIntensity);
+		NoiseMID->SetScalarParameterValue(TEXT("Amount"), NoiseIntensity);
+	}
+	if (AberrationMID)
+	{
+		const float AberrIntensity = FMath::Lerp(0.4f, 1.6f, CombinedStress);
+		AberrationMID->SetScalarParameterValue(TEXT("Intensity"), AberrIntensity);
+		AberrationMID->SetScalarParameterValue(TEXT("Strength"), AberrIntensity);
+		AberrationMID->SetScalarParameterValue(TEXT("Amount"), AberrIntensity);
 	}
 }
 

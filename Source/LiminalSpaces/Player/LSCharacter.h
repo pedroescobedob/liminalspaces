@@ -10,6 +10,10 @@ class UCameraComponent;
 class ULSHealthComponent;
 class ULSCombatComponent;
 class ULSInteractionComponent;
+class UPostProcessComponent;
+class UMaterialInstanceDynamic;
+class UMaterialInterface;
+class UCameraShakeBase;
 
 UCLASS()
 class LIMINALSPACES_API ALSCharacter : public ACharacter
@@ -67,6 +71,35 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LiminalSpaces|Mesh")
 	TObjectPtr<USkeletalMeshComponent> FirstPersonMesh;
 
+	// VHS / Bodycam post process — applied per-character so it follows the player
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LiminalSpaces|PostProcess")
+	TObjectPtr<UPostProcessComponent> CameraPostProcess;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LiminalSpaces|PostProcess")
+	TObjectPtr<UMaterialInterface> VHSBaseMaterial;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LiminalSpaces|PostProcess")
+	TObjectPtr<UMaterialInterface> NoiseBaseMaterial;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LiminalSpaces|PostProcess")
+	TObjectPtr<UMaterialInterface> AberrationBaseMaterial;
+
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> NoiseMID;
+
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> AberrationMID;
+
+	// Camera shake classes from the Bodycam VHS pack
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LiminalSpaces|CameraShake")
+	TSubclassOf<UCameraShakeBase> IdleCameraShakeClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LiminalSpaces|CameraShake")
+	TSubclassOf<UCameraShakeBase> WalkCameraShakeClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LiminalSpaces|CameraShake")
+	TSubclassOf<UCameraShakeBase> RunCameraShakeClass;
+
 	// Input
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LiminalSpaces|Input")
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
@@ -123,6 +156,11 @@ protected:
 
 private:
 	void CreateInputActions();
+	void UpdateCameraShakeForMovement();
+	void UpdatePostProcessIntensity(float DeltaTime);
+	void InitializePostProcess();
+	TSubclassOf<UCameraShakeBase> CurrentShakeClass;
+	float CurrentDangerBlend = 0.0f;
 	void HandleMove(const struct FInputActionValue& Value);
 	void HandleLook(const struct FInputActionValue& Value);
 	void HandleJump();
